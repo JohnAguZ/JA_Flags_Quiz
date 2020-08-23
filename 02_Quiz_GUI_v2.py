@@ -57,7 +57,7 @@ class Start:
     def to_quiz(self):
         correct_num = self.num_correct.get()
         q_asked = self.questions_asked.get()
-        Quiz(self , q_asked , correct_num )
+        Quiz(self, correct_num, q_asked)
 
     def to_help1(self):
         help_text1 = "Welcome to the International Flags Quiz. \n" \
@@ -112,7 +112,7 @@ class Help1:
 
 
 class Quiz:
-    def __init__(self, partner, correct_ans, q_asked, correct_num ):
+    def __init__(self, partner, correct_ans, q_asked, ):
 
         all_flags = open("flag_codes.csv")
         csv_all_flags = csv.reader(all_flags)
@@ -138,7 +138,7 @@ class Quiz:
 
         # Variable to hold # correct
         self.q_correct = IntVar()
-        self.q_correct.set()
+        self.q_correct.set(0)
 
         # List for holding statistics
         self.stats_list = []
