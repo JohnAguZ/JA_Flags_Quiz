@@ -203,6 +203,10 @@ class Quiz:
                                   command=lambda: self.next_question(flag_list, q_asked, correct_ans))
         self.next_button.grid(row=0, column=3, padx=5, pady=5)
 
+        self.results_button = Button(self.button_frame, text="To Results",
+                                     bg="#003366", fg="white", font="Arial 14 bold",
+                                     command=lambda: self.to_game_results())
+
         self.submit_button.config(state=DISABLED)
 
     def check_response(self):
@@ -261,7 +265,7 @@ class Quiz:
             # add one to the num correct.
             self.asked_questions.set(running_total)
             self.q_correct.set(total_correct)
-            print(self.asked_questions)
+
 
     def next_question(self, flag_list, q_asked, correct_num):
 
@@ -298,18 +302,13 @@ class Quiz:
         self.submit_button.config(state=NORMAL)
         self.next_button.config(state=DISABLED)
 
-        self.asked_questions.get()
-        if q_asked == 10:
-            self.to_game_results()
-
-
     def to_quit(self):
         root.destroy()
 
     def to_game_results(self):
         num_asked = self.asked_questions.get()
-        correct_num = self.q_correct.get()
-        Game_Results(self, num_asked, correct_num)
+        q_correct = self.q_correct.get()
+        Game_Results(self, num_asked, q_correct)
 
     def to_quiz_help2(self):
         help_text2 = "Welcome to the International Flags Quiz. \n" \
@@ -363,12 +362,12 @@ class Help2:
 
 
 class Game_Results:
-    def __init__(self, num_asked, correct_num):
+    def __init__(self, num_asked, q_correct):
 
         # Initialise Variables
         self.out_of = num_asked
 
-        self.correct_resp = correct_num
+        self.correct_resp = q_correct
 
         self.raw = (self.out_of // self.correct_resp)
 
