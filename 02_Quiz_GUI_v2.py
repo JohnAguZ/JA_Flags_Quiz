@@ -57,7 +57,7 @@ class Start:
     def to_quiz(self):
         correct_num = self.num_correct.get()
         q_asked = self.questions_asked.get()
-        Quiz(self, correct_num, q_asked)
+        Quiz(self , q_asked , correct_num )
 
     def to_help1(self):
         help_text1 = "Welcome to the International Flags Quiz. \n" \
@@ -112,7 +112,7 @@ class Help1:
 
 
 class Quiz:
-    def __init__(self, partner, correct_ans, q_asked, ):
+    def __init__(self, partner, correct_ans, q_asked, correct_num ):
 
         all_flags = open("flag_codes.csv")
         csv_all_flags = csv.reader(all_flags)
@@ -138,7 +138,7 @@ class Quiz:
 
         # Variable to hold # correct
         self.q_correct = IntVar()
-        self.q_correct.set(0)
+        self.q_correct.set()
 
         # List for holding statistics
         self.stats_list = []
@@ -238,14 +238,14 @@ class Quiz:
                 is_wrong = "yes"
                 error_feedback = "This is wrong," \
                                  "try again!"
-                running_total += 1
+                running_total = running_total + 1
                 self.submit_button.config(state=DISABLED)
                 self.next_button.config(state=NORMAL)
             elif compare1 == compare2:
                 is_wrong = "no"
                 error_feedback1 = "Correct!"
-                running_total += 1
-                total_correct += 1
+                running_total = running_total + 1
+                total_correct = total_correct + 1
                 self.submit_button.config(state=DISABLED)
                 self.next_button.config(state=NORMAL)
 
@@ -257,15 +257,14 @@ class Quiz:
             self.response_entry.config(bg=error_back)
             self.error_label.config(text=error_feedback, fg="#ff1100")
 
-        elif is_wrong == "no":
+        else:
             self.response_entry.config(bg="#42f572")
             self.error_label.config(text=error_feedback1, fg="#00a113")
-        else:
             # Add 1 to both the number of questions asked and if the user's first input was correct,
             # add one to the num correct.
             self.asked_questions.set(running_total)
             self.q_correct.set(total_correct)
-
+            print(self.asked_questions, self.q_correct)
 
     def next_question(self, flag_list, q_asked, correct_num):
 
