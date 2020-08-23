@@ -112,7 +112,7 @@ class Help1:
 
 
 class Quiz:
-    def __init__(self, partner, correct_num, q_asked):
+    def __init__(self, partner, correct_ans, q_asked, ):
 
         all_flags = open("flag_codes.csv")
         csv_all_flags = csv.reader(all_flags)
@@ -130,7 +130,7 @@ class Quiz:
 
         # String Variable to hold correct answer
         self.valid_response = StringVar()
-        self.valid_response.set(correct_num)
+        self.valid_response.set(correct_ans)
 
         # Variable to hold # of questions asked
         self.asked_questions = IntVar()
@@ -142,8 +142,7 @@ class Quiz:
 
         # List for holding statistics
         self.stats_list = []
-        self.game_stats_list = [q_asked, correct_num]
-        print(self.game_stats_list)
+        self.game_stats_list = q_asked
 
         # GUI Setup
         self.quiz_box = Toplevel()
@@ -174,23 +173,17 @@ class Quiz:
                                     font="Arial 16 bold", width=20)
         self.response_entry.grid(row=0, column=1, padx=5)
 
-        self.question = Label(self.entry_error_frame,
-                              bg=background_color, fg="maroon", text="What country has this flag?",
-                              font="Arial 10 bold", wrap=175)
-        self.question.grid(row=4, columnspan=5, pady=5)
-
         self.error_label = Label(self.entry_error_frame,
-                                 bg=background_color, fg="maroon", text="",
+                                 bg=background_color, fg="maroon", text="What country has this flag?",
                                  font="Arial 10 bold", wrap=175)
         self.error_label.grid(row=3, columnspan=5, pady=5)
 
-        # Questionnaire
-        self.Q_and_A = Label(self.quiz_frame, text="", bg=background_color)
-        self.Q_and_A.grid(row=4, pady=10)
+        # Disable the entry
+        self.response_entry.config(state=DISABLED)
 
         # Buttons go here...
         self.button_frame = Frame(self.quiz_frame, bg=background_color)
-        self.button_frame.grid(row=5, pady=10)
+        self.button_frame.grid(row=4, pady=10)
 
         # Help Button
         self.help_button = Button(self.button_frame, text="Help",
@@ -207,7 +200,7 @@ class Quiz:
 
         self.next_button = Button(self.button_frame, text="Next",
                                   bg="#00AAFF", fg="white", font="Arial 14 bold",
-                                  command=lambda: self.next_question(flag_list, q_asked, correct_num,))
+                                  command=lambda: self.next_question(flag_list, q_asked, correct_ans))
         self.next_button.grid(row=0, column=3, padx=5, pady=5)
 
         self.submit_button.config(state=DISABLED)
@@ -216,27 +209,26 @@ class Quiz:
         self.next_button.config(state=DISABLED)
         compare1 = self.valid_response.get()
         compare2 = self.response_entry.get()
-        correct_num = self.q_correct.get()
+        num_correct = self.q_correct.get()
         q_asked = self.asked_questions.get()
 
         compare1 = compare1.lower()
         compare2 = compare2.lower()
 
-
         print("compare 1", compare1)
         print("compare 2", compare2)
-
         # Set error background colours (and assume that there are no errors at the start...)
         error_back = "#ffafaf"
         is_wrong = "no"
 
         # Change background colours to white (For testing purposes)...
         self.response_entry.config(bg="white")
-        self.error_label.config(text="")
+        self.error_label.config(text="What country has this flag?")
+
+        running_total = q_asked
+        total_correct = num_correct
 
         try:
-            running_total = int(q_asked)
-            total_correct = int(correct_num)
 
             if compare1 != compare2:
                 is_wrong = "yes"
@@ -265,17 +257,26 @@ class Quiz:
             self.response_entry.config(bg="#42f572")
             self.error_label.config(text=error_feedback1, fg="#00a113")
         else:
-
             # Add 1 to both the number of questions asked and if the user's first input was correct,
             # add one to the num correct.
-            self.asked_questions.set(q_asked)
-            self.q_correct.set(correct_num)
-            print(q_asked, correct_num)
+            self.asked_questions.set(running_total)
+            self.q_correct.set(total_correct)
+            print(self.asked_questions)
 
     def next_question(self, flag_list, q_asked, correct_num):
+
+        # Enable the response entry
+        self.response_entry.config(state=NORMAL)
+
         # choose random flag
         secret_flag = random.choice(flag_list)
 
+        # Reset the response entry
+        self.response_entry.config(bg="white")
+        self.response_entry.delete(0, END)
+
+        # Reset question
+        self.error_label.config(text="What country has this flag?", fg="maroon")
         # Get filename...
         flag_pic = (secret_flag[0])
         var_filename = "{}-flag.gif".format(flag_pic)
@@ -297,11 +298,18 @@ class Quiz:
         self.submit_button.config(state=NORMAL)
         self.next_button.config(state=DISABLED)
 
+        self.asked_questions.get()
         if q_asked == 10:
-            self.game_results()
+            self.to_game_results()
+
 
     def to_quit(self):
         root.destroy()
+
+    def to_game_results(self):
+        num_asked = self.asked_questions.get()
+        correct_num = self.q_correct.get()
+        Game_Results(self, num_asked, correct_num)
 
     def to_quiz_help2(self):
         help_text2 = "Welcome to the International Flags Quiz. \n" \
@@ -310,11 +318,6 @@ class Quiz:
                      "of the quiz prior to you doing the quiz\n " \
 
         Help2(self, help_text2)
-
-    def game_results(self):
-        num_asked = self.asked_questions.get()
-        correct_ans = self.q_correct.get()
-        Game_Results(self, num_asked, correct_ans)
 
 
 class Help2:
@@ -360,16 +363,18 @@ class Help2:
 
 
 class Game_Results:
-    def __init__(self, num_asked, ans_correct):
+    def __init__(self, num_asked, correct_num):
 
         # Initialise Variables
-        self.out_of = IntVar()
-        self.out_of.set(num_asked)
+        self.out_of = num_asked
 
-        self.correct_resp = IntVar()
-        self.correct_resp.set(ans_correct)
+        self.correct_resp = correct_num
 
-        print(self.out_of, self.correct_resp)
+        self.raw = (self.out_of // self.correct_resp)
+
+        self.percentage = (self.raw * 100)
+
+        print(self.percentage)
 
 
 # main routine
