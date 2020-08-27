@@ -214,18 +214,14 @@ class Quiz:
 
         self.results_button = Button(self.button_frame, text="To Results",
                                      bg="#003366", fg="white", font="Arial 14 bold",
-                                     command=lambda: self.to_game_results(q_asked,
-                                                                          num_correct))
+                                     command=lambda: self.to_game_results(self.game_stats_list))
         self.results_button.grid(row=0, column=4, padx=5, pady=5)
         self.submit_button.config(state=DISABLED)
         self.results_button.config(state=DISABLED)
 
-    def to_game_results(self, num_asked, q_correct):
-        game_stats = self.game_stats_list.append(num_asked)
-        q_correct = self.q_correct.get()
-        num_asked = self.asked_questions.get()
+    def to_game_results(self, game_stats_list):
 
-        Game_Results(self, num_asked, q_correct, game_stats)
+        Game_Results(self, game_stats_list)
 
     def check_response(self):
         self.next_button.config(state=DISABLED)
@@ -296,14 +292,22 @@ class Quiz:
             # add one to the num correct.
 
     def next_question(self, flag_list, correct_ans, q_asked, num_correct):
+
         num_correct = self.q_correct.get()
         q_asked = self.asked_questions.get()
 
+        stat1 = q_asked
+        stat2 = num_correct
+
         # Stats statement
-        stats_statement = "Questions Asked: {}\n Questions Correct: {} \n".format(q_asked, num_correct)
+        stats_statement = "Questions Asked: {} \n" \
+                          "Questions Correct: {}".format(q_asked, num_correct)
         # Edit the stats label
         self.stats_label.configure(text=stats_statement)
 
+        # Put data into the list
+        self.game_stats_list[0] = stat1
+        self.game_stats_list[1] = stat2
 
         # Enable the response entry
         self.response_entry.config(state=NORMAL)
@@ -345,6 +349,9 @@ class Quiz:
 
         # Ensures 10 questions have been asked.
         if num_asked == 10:
+            self.error_label.destroy()
+            self.flags_label.destroy()
+            self.response_entry.config(state=DISABLED)
             self.submit_button.config(state=DISABLED)
             self.next_button.config(state=DISABLED)
             self.results_button.config(state=NORMAL)
@@ -352,7 +359,8 @@ class Quiz:
             finish_statement = "Congratulations!! \n" \
                                "You have finished the quiz!\n" \
                                "Click the 'RESULTS' Button to look at your results".format(num_asked)
-            self.flags_label.config(bg="#00bbd4", font="Arial 25 bold", text=finish_statement)
+
+            self.flags_label.configure(bg="#00bbd4", font="Arial 25 bold", text=finish_statement)
 
     def to_quit(self):
         root.destroy()
@@ -409,16 +417,14 @@ class Help2:
 
 
 class Game_Results:
-    def __init__(self, partner, num_asked, q_correct, game_stats):
-        print("num_asked", num_asked)
+    def __init__(self, partner, game_stats):
+        print("game_stats", game_stats)
         # Disable Help Button
         partner.results_button.config(state=DISABLED)
 
-        var_num_asked = IntVar()
-        var_num_asked.set(num_asked)
+        var_num_asked = game_stats[0]
 
-        num_correct = IntVar()
-        num_correct.set(q_correct)
+        num_correct = game_stats[1]
 
         heading = "Arial 12 bold"
         content = "Arial 12"
@@ -454,7 +460,7 @@ class Game_Results:
         self.details_frame = Frame(self.stats_frame, bg=background)
         self.details_frame.grid(row=2)
 
-        # Starting Balance (Row 2.0)
+        # Stats label (Row 2.0)
 
         self.stats_label = Label(self.details_frame, font=content,
                                  anchor="e", bg=background)
@@ -466,27 +472,43 @@ class Game_Results:
         print("calc1", calc1)
         print("calc2", calc2)
 
-        raw = calc1 // calc2
+        raw = calc2 / float(10)
         print(raw)
         percent = raw * 100
         print(percent)
+
+        self.correct_num_label = Label(self.details_frame, font=content, bg=background,
+                                       text="Total Correct: {}/10".format(calc2))
+        self.correct_num_label.grid(row=1, column=0, padx=0)
+
+        "/n " \
+
+        self.total_questions_label = Label(self.details_frame, font=content, bg=background,
+                                           text="Asked Questions: {}".format(calc1))
+        self.total_questions_label.grid(row=2, column=0, padx=0)
+
+        "/n " \
+
         self.percentage_label = Label(self.details_frame, font=content, bg=background,
-                                      text="{}%".format(percent))
-        self.percentage_label.grid(row=0, column=0, padx=0)
+                                      text="You got {}% of the questions correct".format(percent))
+        self.percentage_label.grid(row=3, column=0, padx=0)
 
         # Buttons go here
+        self.buttons_frame = Frame(self.stats_frame, bg=background)
+        self.buttons_frame.grid(row=3)
+
         # Dismiss button (Row 5.0)
-        self.dismiss_btn = Button(self.details_frame, text="Dismiss",
+        self.dismiss_btn = Button(self.buttons_frame, text="Dismiss",
                                   width=10, bg="orange", font="Arial 10 bold",
                                   command=partial(self.close_stats, partner))
-        self.dismiss_btn.grid(row=2, column=0, pady=5)
+        self.dismiss_btn.grid(row=0, column=0, pady=5)
 
         # Export Button (Row 5.1)
-        self.export_button = Button(self.details_frame,
+        self.export_button = Button(self.buttons_frame,
                                     text="Export",
                                     font="Arial 10 italic", bg="light blue",
-                                    width=10, command=lambda: self.export(percent))
-        self.export_button.grid(row=2, column=1, pady=5)
+                                    width=10, command=lambda: self.export(game_stats))
+        self.export_button.grid(row=0, column=1, pady=5)
 
     def close_stats(self, partner):
         # Put history button back to normal...
@@ -494,6 +516,7 @@ class Game_Results:
         self.stats_box.destroy()
 
     def export(self, game_stats):
+
         Export(self, game_stats)
 
 
@@ -570,6 +593,7 @@ class Export:
 
     def save_stats(self, partner, game_stats):
         # Regular expression to check filename is valid
+
         global problem
         valid_char = "[A-Za-z0-9_]"
         has_error = "no"
