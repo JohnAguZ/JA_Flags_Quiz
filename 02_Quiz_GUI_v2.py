@@ -220,9 +220,11 @@ class Quiz:
         self.submit_button.config(state=DISABLED)
         self.results_button.config(state=DISABLED)
 
-    def to_game_results(self, num_asked, game_stats, q_correct):
+    def to_game_results(self, game_stats, q_correct, num_asked):
+        q_correct = self.q_correct.get()
+        num_asked = self.asked_questions.get()
 
-        Game_Results(self, num_asked, game_stats, q_correct)
+        Game_Results(self, game_stats, q_correct, num_asked)
 
     def check_response(self):
         self.next_button.config(state=DISABLED)
@@ -300,7 +302,8 @@ class Quiz:
         stats_statement = "Questions Asked: {}\n Questions Correct: {} \n".format(q_asked, num_correct)
         # Edit the stats label
         self.stats_label.configure(text=stats_statement)
-        self.game_stats_list.append(stats_statement)
+        self.game_stats_list[1].append(q_asked)
+        self.game_stats_list[2].append(num_correct)
         print(self.game_stats_list)
 
         # Enable the response entry
@@ -408,17 +411,6 @@ class Help2:
 
 class Game_Results:
     def __init__(self, partner, num_asked, q_correct, game_stats):
-        # Initialise Variables
-        self.out_of = num_asked
-
-        self.correct_resp = q_correct
-
-        self.raw = (self.out_of // self.correct_resp)
-
-        self.percentage = (self.raw * 100)
-
-        print(self.percentage)
-
         # Disable Help Button
         partner.results_button.config(state=DISABLED)
 
@@ -456,12 +448,172 @@ class Game_Results:
         self.details_frame = Frame(self.stats_frame, bg=background)
         self.details_frame.grid(row=2)
 
+        # Starting Balance (Row 2.0)
 
+        self.stats_label = Label(self.details_frame, font=content,
+                                 anchor="e", bg=background)
+        self.stats_label.grid(row=0, column=0, padx=0)
+
+        # Calculate percentage
+        calc1 = num_asked
+        calc2 = q_correct
+
+        percent = calc1 // calc2
+        print(percent)
+        '''self.percentage_label = Label(self.details_frame, font=content,
+                                      text="{}".format(percent))
+        self.percentage_label.grid(row=0, column=0, padx=0)'''
+
+        # Buttons go here
+        # Dismiss button (Row 5.0)
+        self.dismiss_btn = Button(self.details_frame, text="Dismiss",
+                                  width=10, bg="orange", font="Arial 10 bold",
+                                  command=partial(self.close_stats, partner))
+        self.dismiss_btn.grid(row=2, column=0, pady=5)
+
+        # Export Button (Row 5.1)
+        self.export_button = Button(self.details_frame,
+                                    text="Export",
+                                    font="Arial 10 italic", bg="light blue",
+                                    width=10, command=lambda: self.export(game_stats))
+        self.export_button.grid(row=2, column=1, pady=5)
 
     def close_stats(self, partner):
         # Put history button back to normal...
         partner.results_button.config(state=NORMAL)
         self.stats_box.destroy()
+
+    def export(self, game_stats):
+        Export(self, game_stats)
+
+
+class Export:
+    def __init__(self, partner, game_stats):
+
+
+
+        background = "#a9ef99"  # Pale Green
+
+        # Disable export button
+        partner.export_button.config(state=DISABLED)
+
+        # Sets up child window (i.e: Export Box)
+        self.export_box = Toplevel()
+
+        # If users press the cross at the top, closes export and
+        # 'releases' export button
+        self.export_box.protocol('WM_DELETE_WINDOW',
+                                 partial(self.close_export, partner))
+
+        # Set up GUI Frame
+        self.export_frame = Frame(self.export_box, width=300, bg=background)
+        self.export_frame.grid()
+
+        # Set up Export heading(Row 0)
+        self.how_heading = Label(self.export_frame, text="Export / Instructions",
+                                 font="Arial 14 bold", bg=background)
+        self.how_heading.grid(row=0)
+
+        # Export Instructions(Row 1)
+        self.export_text = Label(self.export_frame, text="Enter a filename "
+                                                         "in the box below "
+                                                         "and press the Save  "
+                                                         "button to save your"
+                                                         "results to a text file",
+                                 justify=LEFT, width=40,
+                                 bg=background, wrap=250)
+        self.export_text.grid(row=1)
+
+        # Warning Text (Row 2)
+        self.export_text = Label(self.export_frame, text="If the filename "
+                                                         "you enter below "
+                                                         "already exists,  "
+                                                         "its contents will "
+                                                         "be replaced with "
+                                                         "your current results "
+                                                         , wrap=250,
+                                 justify=LEFT, width=40, bg=background,
+                                 font="arial 10 italic", fg="maroon",
+                                 padx=10, pady=10)
+        self.export_text.grid(row=2, pady=10)
+
+        # Filename Entry Box (Row 3)
+        self.filename_entry = Entry(self.export_frame, width=20,
+                                    font="Arial 14 bold", justify=CENTER)
+        self.filename_entry.grid(row=3, pady=10)
+
+        # Error Message Labels(Initially blank, Row 4)
+        self.save_error_label = Label(self.export_frame, text="", fg="maroon",
+                                      bg=background)
+        self.save_error_label.grid(row=4)
+
+        # Save / Cancel Frame (row 5)
+        self.save_cancel_frame = Frame(self.export_frame)
+        self.save_cancel_frame.grid(row=5, pady=10)
+
+        # Save and Cancel Buttons (Row 0 of save_cancel_frame)
+        self.save_button = Button(self.save_cancel_frame, text="Save",
+                                  command=partial(lambda: self.save_stats(partner, game_stats)))
+        self.save_button.grid(row=0, column=0)
+
+        self.cancel_button = Button(self.save_cancel_frame, text="Cancel",
+                                    command=partial(self.close_export, partner))
+        self.cancel_button.grid(row=0, column=1)
+
+    def save_stats(self, partner, game_stats):
+        # Regular expression to check filename is valid
+        global problem
+        valid_char = "[A-Za-z0-9_]"
+        has_error = "no"
+
+        filename = self.filename_entry.get()
+        print(filename)
+
+        for letter in filename:
+            if re.match(valid_char, letter):
+                continue
+
+            elif letter == "":
+                problem = "(No spaces allowed)"
+
+            else:
+                problem = ("(no {}'s allowed".format(letter))
+            has_error = "yes"
+            break
+
+        if filename == "":
+            problem = "Can't be blank"
+            has_error = "yes"
+
+        if has_error == "yes":
+            # Display error message
+            self.save_error_label.config(text="Invalid filename - {}".format(problem))
+            # Change entry box background to pink
+            self.filename_entry.config(bg="#ffafaf")
+            print()
+
+        else:
+            # If there are no errors, generate text file and then close the dialogue
+            # add .text suffix
+            filename = filename + ".txt"
+
+            # Create file to hold data
+            f = open(filename, "w+")
+
+            # Add new line at the end of each item
+            for item in game_stats:
+                f.write(item)
+
+            # Close the file
+            f.close()
+
+            # Close the dialogue
+            self.close_export(partner)
+
+    def close_export(self, partner):
+        # Put history button back to normal...
+        partner.export_button.config(state=NORMAL)
+        self.export_box.destroy()
 
 
 # main routine
