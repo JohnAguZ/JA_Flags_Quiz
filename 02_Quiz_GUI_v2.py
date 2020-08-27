@@ -214,17 +214,18 @@ class Quiz:
 
         self.results_button = Button(self.button_frame, text="To Results",
                                      bg="#003366", fg="white", font="Arial 14 bold",
-                                     command=lambda: self.to_game_results(self.game_stats_list, q_asked,
+                                     command=lambda: self.to_game_results(q_asked,
                                                                           num_correct))
         self.results_button.grid(row=0, column=4, padx=5, pady=5)
         self.submit_button.config(state=DISABLED)
         self.results_button.config(state=DISABLED)
 
-    def to_game_results(self, game_stats, q_correct, num_asked):
+    def to_game_results(self, num_asked, q_correct):
+        game_stats = self.game_stats_list.append(num_asked)
         q_correct = self.q_correct.get()
         num_asked = self.asked_questions.get()
 
-        Game_Results(self, game_stats, q_correct, num_asked)
+        Game_Results(self, num_asked, q_correct, game_stats)
 
     def check_response(self):
         self.next_button.config(state=DISABLED)
@@ -302,9 +303,7 @@ class Quiz:
         stats_statement = "Questions Asked: {}\n Questions Correct: {} \n".format(q_asked, num_correct)
         # Edit the stats label
         self.stats_label.configure(text=stats_statement)
-        self.game_stats_list[1].append(q_asked)
-        self.game_stats_list[2].append(num_correct)
-        print(self.game_stats_list)
+
 
         # Enable the response entry
         self.response_entry.config(state=NORMAL)
@@ -411,8 +410,15 @@ class Help2:
 
 class Game_Results:
     def __init__(self, partner, num_asked, q_correct, game_stats):
+        print("num_asked", num_asked)
         # Disable Help Button
         partner.results_button.config(state=DISABLED)
+
+        var_num_asked = IntVar()
+        var_num_asked.set(num_asked)
+
+        num_correct = IntVar()
+        num_correct.set(q_correct)
 
         heading = "Arial 12 bold"
         content = "Arial 12"
@@ -455,14 +461,18 @@ class Game_Results:
         self.stats_label.grid(row=0, column=0, padx=0)
 
         # Calculate percentage
-        calc1 = num_asked
-        calc2 = q_correct
+        calc1 = var_num_asked.get()
+        calc2 = num_correct.get()
+        print("calc1", calc1)
+        print("calc2", calc2)
 
-        percent = calc1 // calc2
+        raw = calc1 // calc2
+        print(raw)
+        percent = raw * 100
         print(percent)
-        '''self.percentage_label = Label(self.details_frame, font=content,
-                                      text="{}".format(percent))
-        self.percentage_label.grid(row=0, column=0, padx=0)'''
+        self.percentage_label = Label(self.details_frame, font=content, bg=background,
+                                      text="{}%".format(percent))
+        self.percentage_label.grid(row=0, column=0, padx=0)
 
         # Buttons go here
         # Dismiss button (Row 5.0)
@@ -475,7 +485,7 @@ class Game_Results:
         self.export_button = Button(self.details_frame,
                                     text="Export",
                                     font="Arial 10 italic", bg="light blue",
-                                    width=10, command=lambda: self.export(game_stats))
+                                    width=10, command=lambda: self.export(percent))
         self.export_button.grid(row=2, column=1, pady=5)
 
     def close_stats(self, partner):
@@ -489,8 +499,6 @@ class Game_Results:
 
 class Export:
     def __init__(self, partner, game_stats):
-
-
 
         background = "#a9ef99"  # Pale Green
 
