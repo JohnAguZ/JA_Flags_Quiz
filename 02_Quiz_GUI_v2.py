@@ -56,8 +56,8 @@ class Start:
 
     def to_quiz(self):
         correct_num = self.num_correct.get()
-        q_asked = self.questions_asked.get()
-        Quiz(self, correct_num, q_asked)
+
+        Quiz(self, correct_num)
 
     def to_help1(self):
         help_text1 = "Welcome to the International Flags Quiz. \n" \
@@ -112,7 +112,7 @@ class Help1:
 
 
 class Quiz:
-    def __init__(self, partner, correct_ans, q_asked, ):
+    def __init__(self, partner, correct_ans, ):
 
         all_flags = open("flag_codes.csv")
         csv_all_flags = csv.reader(all_flags)
@@ -134,15 +134,16 @@ class Quiz:
 
         # Variable to hold # of questions asked
         self.asked_questions = IntVar()
-        self.asked_questions.set(q_asked)
+        self.asked_questions.set(0)
+        q_asked = self.asked_questions.get()
 
         # Variable to hold # correct
         self.q_correct = IntVar()
         self.q_correct.set(0)
+        num_correct = self.q_correct.get()
 
         # List for holding statistics
-        self.stats_list = []
-        self.game_stats_list = q_asked
+        self.game_stats_list = [q_asked, num_correct]
 
         # GUI Setup
         self.quiz_box = Toplevel()
@@ -178,12 +179,19 @@ class Quiz:
                                  font="Arial 10 bold", wrap=175)
         self.error_label.grid(row=3, columnspan=5, pady=5)
 
+        # Stats label
+        self.stats_frame = Frame(self.quiz_frame, bg=background_color)
+        self.stats_frame.grid(row=4)
+
+        self.stats_label = Label(self.stats_frame, text="Stats...", bg=background_color)
+        self.stats_label.grid(row=0)
+
         # Disable the entry
         self.response_entry.config(state=DISABLED)
 
         # Buttons go here...
         self.button_frame = Frame(self.quiz_frame, bg=background_color)
-        self.button_frame.grid(row=4, pady=10)
+        self.button_frame.grid(row=5, pady=10)
 
         # Help Button
         self.help_button = Button(self.button_frame, text="Help",
@@ -200,21 +208,26 @@ class Quiz:
 
         self.next_button = Button(self.button_frame, text="Next",
                                   bg="#00AAFF", fg="white", font="Arial 14 bold",
-                                  command=lambda: self.next_question(flag_list, q_asked, correct_ans))
+                                  command=lambda: self.next_question(flag_list, correct_ans, q_asked,
+                                                                     num_correct))
         self.next_button.grid(row=0, column=3, padx=5, pady=5)
 
         self.results_button = Button(self.button_frame, text="To Results",
                                      bg="#003366", fg="white", font="Arial 14 bold",
-                                     command=lambda: self.to_game_results())
-
+                                     command=lambda: self.to_game_results(self.game_stats_list, q_asked,
+                                                                          num_correct))
+        self.results_button.grid(row=0, column=4, padx=5, pady=5)
         self.submit_button.config(state=DISABLED)
+        self.results_button.config(state=DISABLED)
+
+    def to_game_results(self, num_asked, game_stats, q_correct):
+
+        Game_Results(self, num_asked, game_stats, q_correct)
 
     def check_response(self):
         self.next_button.config(state=DISABLED)
         compare1 = self.valid_response.get()
         compare2 = self.response_entry.get()
-        num_correct = self.q_correct.get()
-        q_asked = self.asked_questions.get()
 
         compare1 = compare1.lower()
         compare2 = compare2.lower()
@@ -229,23 +242,39 @@ class Quiz:
         self.response_entry.config(bg="white")
         self.error_label.config(text="What country has this flag?")
 
-        running_total = q_asked
-        total_correct = num_correct
+        # Get the num correct
+        num_correct = self.q_correct.get()
+
+        # Get number of questions asked, add one and reset
+        q_asked = self.asked_questions.get()
 
         try:
 
             if compare1 != compare2:
+
                 is_wrong = "yes"
                 error_feedback = "This is wrong," \
                                  "try again!"
-                running_total = running_total + 1
+
+                # Adding one to number correct and setting it
+                q_asked += 1
+                self.asked_questions.set(q_asked)
+
                 self.submit_button.config(state=DISABLED)
                 self.next_button.config(state=NORMAL)
             elif compare1 == compare2:
+
                 is_wrong = "no"
                 error_feedback1 = "Correct!"
-                running_total = running_total + 1
-                total_correct = total_correct + 1
+
+                # Adding one to number correct and setting it
+                q_asked += 1
+                self.asked_questions.set(q_asked)
+
+                # Adding one to number correct and setting it
+                num_correct += 1
+                self.q_correct.set(num_correct)
+
                 self.submit_button.config(state=DISABLED)
                 self.next_button.config(state=NORMAL)
 
@@ -262,14 +291,22 @@ class Quiz:
             self.error_label.config(text=error_feedback1, fg="#00a113")
             # Add 1 to both the number of questions asked and if the user's first input was correct,
             # add one to the num correct.
-            self.asked_questions.set(running_total)
-            self.q_correct.set(total_correct)
-            print(self.asked_questions, self.q_correct)
 
-    def next_question(self, flag_list, q_asked, correct_num):
+    def next_question(self, flag_list, correct_ans, q_asked, num_correct):
+        num_correct = self.q_correct.get()
+        q_asked = self.asked_questions.get()
+
+        # Stats statement
+        stats_statement = "Questions Asked: {}\n Questions Correct: {} \n".format(q_asked, num_correct)
+        # Edit the stats label
+        self.stats_label.configure(text=stats_statement)
+        self.game_stats_list.append(stats_statement)
+        print(self.game_stats_list)
 
         # Enable the response entry
         self.response_entry.config(state=NORMAL)
+        # Keep the results button disabled
+        self.results_button.config(state=DISABLED)
 
         # choose random flag
         secret_flag = random.choice(flag_list)
@@ -301,13 +338,22 @@ class Quiz:
         self.submit_button.config(state=NORMAL)
         self.next_button.config(state=DISABLED)
 
+        # Results page
+        num_asked = self.asked_questions.get()
+
+        # Ensures 10 questions have been asked.
+        if num_asked == 10:
+            self.submit_button.config(state=DISABLED)
+            self.next_button.config(state=DISABLED)
+            self.results_button.config(state=NORMAL)
+
+            finish_statement = "Congratulations!! \n" \
+                               "You have finished the quiz!\n" \
+                               "Click the 'RESULTS' Button to look at your results".format(num_asked)
+            self.flags_label.config(bg="#00bbd4", font="Arial 25 bold", text=finish_statement)
+
     def to_quit(self):
         root.destroy()
-
-    def to_game_results(self):
-        num_asked = self.asked_questions.get()
-        q_correct = self.q_correct.get()
-        Game_Results(self, num_asked, q_correct)
 
     def to_quiz_help2(self):
         help_text2 = "Welcome to the International Flags Quiz. \n" \
@@ -361,8 +407,7 @@ class Help2:
 
 
 class Game_Results:
-    def __init__(self, num_asked, q_correct):
-
+    def __init__(self, partner, num_asked, q_correct, game_stats):
         # Initialise Variables
         self.out_of = num_asked
 
@@ -373,6 +418,50 @@ class Game_Results:
         self.percentage = (self.raw * 100)
 
         print(self.percentage)
+
+        # Disable Help Button
+        partner.results_button.config(state=DISABLED)
+
+        heading = "Arial 12 bold"
+        content = "Arial 12"
+        background = "#a9ef99"
+
+        # Sets up child window
+        self.stats_box = Toplevel()
+
+        # If user press the cross at the top, closes child window and 'releases' help button
+        self.stats_box.protocol('WM_DELETE_WINDOW', partial(self.close_stats, partner))
+
+        # Set up GUI Frame
+        self.stats_frame = Frame(self.stats_box, bg=background, width=300)
+        self.stats_frame.grid()
+
+        # Set up Help heading (Row 0)
+        self.stats_heading_label = Label(self.stats_frame, text="Game Statistics",
+                                         font="arial 19 bold", bg=background)
+        self.stats_heading_label.grid(row=0)
+
+        # To export <instructions> (row 1)
+        self.export_instructions = Label(self.stats_frame,
+                                         text="Here are your Game Statistics. "
+                                              "Please use the Export button to "
+                                              "access the results of each "
+                                              "round that you played ", wrap=250,
+                                         font="arial 10 italic",
+                                         justify=LEFT, fg="green",
+                                         padx=10, pady=10, bg=background)
+        self.export_instructions.grid(row=1)
+
+        # Stats Frame (Row 2.0)
+        self.details_frame = Frame(self.stats_frame, bg=background)
+        self.details_frame.grid(row=2)
+
+
+
+    def close_stats(self, partner):
+        # Put history button back to normal...
+        partner.results_button.config(state=NORMAL)
+        self.stats_box.destroy()
 
 
 # main routine
