@@ -427,7 +427,7 @@ class Game_Results:
 
         num_correct = game_stats[1]
 
-        game_stats_list = [var_num_asked, num_correct]
+        game_stats = [var_num_asked, num_correct]
 
         heading = "Arial 12 bold"
         content = "Arial 12"
@@ -511,7 +511,7 @@ class Game_Results:
         self.export_button = Button(self.buttons_frame,
                                     text="Export",
                                     font="Arial 10 bold", bg="light blue", width=10,
-                                    command=lambda: self.export(game_stats_list))
+                                    command=lambda: self.export(game_stats))
         self.export_button.grid(row=0, column=2, pady=5, padx=5)
 
     def close_stats(self, partner):
@@ -519,9 +519,9 @@ class Game_Results:
         partner.results_button.config(state=NORMAL)
         self.stats_box.destroy()
 
-    def export(self, game_stats_list):
+    def export(self, game_stats):
 
-        Export(self, game_stats_list)
+        Export(self, game_stats)
 
     def to_quiz_help3(self):
         help_text3 = "Welcome to the International Flags Quiz Results Page! \n" \
@@ -575,7 +575,7 @@ class Help3:
 
 
 class Export:
-    def __init__(self, partner, game_stats_list):
+    def __init__(self, partner, game_stats):
 
         background = "#a9ef99"  # Pale Green
 
@@ -638,18 +638,17 @@ class Export:
 
         # Save and Cancel Buttons (Row 0 of save_cancel_frame)
         self.save_button = Button(self.save_cancel_frame, text="Save", width=5,
-                                  command=lambda: self.save_stats(partner, game_stats_list))
+                                  command=lambda: self.save_stats(partner, game_stats))
         self.save_button.grid(row=0, column=0, padx=5)
 
         self.cancel_button = Button(self.save_cancel_frame, text="Cancel", width=5,
                                     command=partial(self.close_export, partner))
         self.cancel_button.grid(row=0, column=1, padx=5)
 
-    def save_stats(self, partner, game_stats_list):
+    def save_stats(self, partner, game_stats):
         # Regular expression to check filename is valid
 
-        print(game_stats_list)
-
+        print(game_stats)
 
         global problem
         valid_char = "[A-Za-z0-9_]"
@@ -690,9 +689,12 @@ class Export:
             f = open(filename, "w+")
 
             # Add new line at the end of each item
-            for item in game_stats_list:
-                str(item)
-                f.write(item)
+            for round in game_stats:
+
+                f.write(round + "\n")
+
+            # Heading for rounds
+            f.write("\nRound Details\n\n")
 
             # Close the file
             f.close()
