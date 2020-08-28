@@ -195,19 +195,19 @@ class Quiz:
 
         # Help Button
         self.help_button = Button(self.button_frame, text="Help",
-                                  bg="#808080", fg="white", font="Arial 14 bold",
+                                  bg="#808080", fg="white", font="Arial 14 bold", width=5,
                                   command=self.to_quiz_help2)
         self.help_button.grid(row=0, column=1, padx=5, pady=5)
 
         self.submit_button = Button(self.button_frame, text="Submit",
-                                    bg="#009900", fg="white", font="Arial 14 bold",
+                                    bg="#009900", fg="white", font="Arial 14 bold", width=6,
                                     command=self.check_response)
         self.submit_button.focus()
         self.submit_button.bind('<Return>', lambda e: self.check_response())
         self.submit_button.grid(row=0, column=2, padx=5, pady=5)
 
         self.next_button = Button(self.button_frame, text="Next",
-                                  bg="#00AAFF", fg="white", font="Arial 14 bold",
+                                  bg="#00AAFF", fg="white", font="Arial 14 bold", width=5,
                                   command=lambda: self.next_question(flag_list, correct_ans, q_asked,
                                                                      num_correct))
         self.next_button.grid(row=0, column=3, padx=5, pady=5)
@@ -349,32 +349,33 @@ class Quiz:
 
         # Ensures 10 questions have been asked.
         if num_asked == 10:
-            self.error_label.destroy()
+            self.response_entry.destroy()
+            self.flag_box.destroy()
             self.flags_label.destroy()
-            self.response_entry.config(state=DISABLED)
             self.submit_button.config(state=DISABLED)
             self.next_button.config(state=DISABLED)
+            self.stats_label.configure(fg="#00bbd4")
             self.results_button.config(state=NORMAL)
 
             finish_statement = "Congratulations!! \n" \
                                "You have finished the quiz!\n" \
-                               "Click the 'RESULTS' Button to look at your results".format(num_asked)
+                               "Click the 'RESULTS' Button to look at your results"
 
-            self.flags_label.configure(bg="#00bbd4", font="Arial 25 bold", text=finish_statement)
+            self.error_label.configure(bg="#00bbd4", font="Arial 15 bold", text=finish_statement, padx=5)
 
     def to_quit(self):
         root.destroy()
 
     def to_quiz_help2(self):
         help_text2 = "Welcome to the International Flags Quiz. \n" \
-                     "This quiz is aimed at testing your knowledge of different countries and their flags.\n \n" \
-                     "When you click the 'Play' button, you will be sent to a minor page showing you the layout " \
-                     "of the quiz prior to you doing the quiz\n " \
+                     "This quiz will ask you 10 questions and 10 flags will appear.\n \n" \
+                     "You can check your answer by clicking on the 'Submit' button" \
+                     "and when you either get the question right or wrong, the program will tell you.\n " \
 
-        Help2(self, help_text2)
+        Help_2(self, help_text2)
 
 
-class Help2:
+class Help_2:
     def __init__(self, partner, help_text):
         background = "#a9ef99"
 
@@ -426,6 +427,8 @@ class Game_Results:
 
         num_correct = game_stats[1]
 
+        game_stats_list = [var_num_asked, num_correct]
+
         heading = "Arial 12 bold"
         content = "Arial 12"
         background = "#a9ef99"
@@ -460,15 +463,10 @@ class Game_Results:
         self.details_frame = Frame(self.stats_frame, bg=background)
         self.details_frame.grid(row=2)
 
-        # Stats label (Row 2.0)
-
-        self.stats_label = Label(self.details_frame, font=content,
-                                 anchor="e", bg=background)
-        self.stats_label.grid(row=0, column=0, padx=0)
-
         # Calculate percentage
-        calc1 = var_num_asked.get()
-        calc2 = num_correct.get()
+        calc1 = var_num_asked
+        calc2 = num_correct
+
         print("calc1", calc1)
         print("calc2", calc2)
 
@@ -479,49 +477,105 @@ class Game_Results:
 
         self.correct_num_label = Label(self.details_frame, font=content, bg=background,
                                        text="Total Correct: {}/10".format(calc2))
-        self.correct_num_label.grid(row=1, column=0, padx=0)
+        self.correct_num_label.grid(row=0, column=0, padx=0)
 
         "/n " \
 
         self.total_questions_label = Label(self.details_frame, font=content, bg=background,
                                            text="Asked Questions: {}".format(calc1))
-        self.total_questions_label.grid(row=2, column=0, padx=0)
+        self.total_questions_label.grid(row=1, column=0, padx=0)
 
         "/n " \
 
         self.percentage_label = Label(self.details_frame, font=content, bg=background,
                                       text="You got {}% of the questions correct".format(percent))
-        self.percentage_label.grid(row=3, column=0, padx=0)
+        self.percentage_label.grid(row=2, column=0, padx=0)
 
         # Buttons go here
         self.buttons_frame = Frame(self.stats_frame, bg=background)
         self.buttons_frame.grid(row=3)
 
+        # Help Button
+        self.help_button = Button(self.buttons_frame, text="Help",
+                                  bg="#808080", fg="white", font="Arial 10 bold", width=10,
+                                  command=self.to_quiz_help3)
+        self.help_button.grid(row=0, column=0, pady=5, padx=5)
+
         # Dismiss button (Row 5.0)
         self.dismiss_btn = Button(self.buttons_frame, text="Dismiss",
-                                  width=10, bg="orange", font="Arial 10 bold",
+                                  bg="orange", font="Arial 10 bold", width=10,
                                   command=partial(self.close_stats, partner))
-        self.dismiss_btn.grid(row=0, column=0, pady=5)
+        self.dismiss_btn.grid(row=0, column=1, pady=5, padx=5)
 
         # Export Button (Row 5.1)
         self.export_button = Button(self.buttons_frame,
                                     text="Export",
-                                    font="Arial 10 italic", bg="light blue",
-                                    width=10, command=lambda: self.export(game_stats))
-        self.export_button.grid(row=0, column=1, pady=5)
+                                    font="Arial 10 bold", bg="light blue", width=10,
+                                    command=lambda: self.export(game_stats_list))
+        self.export_button.grid(row=0, column=2, pady=5, padx=5)
 
     def close_stats(self, partner):
         # Put history button back to normal...
         partner.results_button.config(state=NORMAL)
         self.stats_box.destroy()
 
-    def export(self, game_stats):
+    def export(self, game_stats_list):
 
-        Export(self, game_stats)
+        Export(self, game_stats_list)
+
+    def to_quiz_help3(self):
+        help_text3 = "Welcome to the International Flags Quiz Results Page! \n" \
+                     "This page tell you your grand stats.\n \n" \
+                     "You can export your results in a .txt file via the 'Export' button. " \
+                     "To redo the quiz again and try for a higher score, re-run the program\n " \
+
+        Help3(self, help_text3)
+
+
+class Help3:
+    def __init__(self, partner, help_text):
+        background = "#a9ef99"
+
+        # Disable help button
+        partner.help_button.config(state=DISABLED)
+
+        # Sets up child window (ie: Help Box)
+        self.help_box = Toplevel()
+
+        # If users press cross at the top, close help and 'release' help button
+        self.help_box.protocol('WM_DELETE_WINDOW', partial(self.close_help, partner))
+
+        # Set up GUI Frame
+        self.help_frame = Frame(self.help_box, width=300, bg=background)
+        self.help_frame.grid()
+
+        # Set up history heading (row 0)
+        self.how_heading = Label(self.help_frame, text="The Help Page",
+                                 font="Arial 19 bold", bg=background)
+        self.how_heading.grid(row=0)
+
+        # Help for Start Class (Label,Row 1)
+        self.help_text = Label(self.help_frame,
+                               text=help_text, wrap=250,
+                               font="arial 10 italic",
+                               justify=LEFT, width=40, bg=background, fg="maroon",
+                               padx=10, pady=10)
+        self.help_text.grid(row=1)
+
+        # Dismiss button (Row 2)
+        self.dismiss_btn = Button(self.help_frame, text="Dismiss",
+                                  width=10, bg="orange", font="Arial 10 bold",
+                                  command=partial(self.close_help, partner))
+        self.dismiss_btn.grid(row=2, pady=10)
+
+    def close_help(self, partner):
+        # Put history button back to normal...
+        partner.help_button.config(state=NORMAL)
+        self.help_box.destroy()
 
 
 class Export:
-    def __init__(self, partner, game_stats):
+    def __init__(self, partner, game_stats_list):
 
         background = "#a9ef99"  # Pale Green
 
@@ -579,20 +633,23 @@ class Export:
         self.save_error_label.grid(row=4)
 
         # Save / Cancel Frame (row 5)
-        self.save_cancel_frame = Frame(self.export_frame)
+        self.save_cancel_frame = Frame(self.export_frame, bg=background)
         self.save_cancel_frame.grid(row=5, pady=10)
 
         # Save and Cancel Buttons (Row 0 of save_cancel_frame)
-        self.save_button = Button(self.save_cancel_frame, text="Save",
-                                  command=partial(lambda: self.save_stats(partner, game_stats)))
-        self.save_button.grid(row=0, column=0)
+        self.save_button = Button(self.save_cancel_frame, text="Save", width=5,
+                                  command=lambda: self.save_stats(partner, game_stats_list))
+        self.save_button.grid(row=0, column=0, padx=5)
 
-        self.cancel_button = Button(self.save_cancel_frame, text="Cancel",
+        self.cancel_button = Button(self.save_cancel_frame, text="Cancel", width=5,
                                     command=partial(self.close_export, partner))
-        self.cancel_button.grid(row=0, column=1)
+        self.cancel_button.grid(row=0, column=1, padx=5)
 
-    def save_stats(self, partner, game_stats):
+    def save_stats(self, partner, game_stats_list):
         # Regular expression to check filename is valid
+
+        print(game_stats_list)
+
 
         global problem
         valid_char = "[A-Za-z0-9_]"
@@ -633,7 +690,8 @@ class Export:
             f = open(filename, "w+")
 
             # Add new line at the end of each item
-            for item in game_stats:
+            for item in game_stats_list:
+                str(item)
                 f.write(item)
 
             # Close the file
