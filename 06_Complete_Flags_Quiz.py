@@ -68,7 +68,6 @@ class Start:
 
         Help1(self, help_text1)
 
-
 class Help1:
     def __init__(self, partner, help_text):
         background = "#a9ef99"
@@ -109,7 +108,6 @@ class Help1:
         # Put history button back to normal...
         partner.how_to_play_button.config(state=NORMAL)
         self.help_box.destroy()
-
 
 class Quiz:
     def __init__(self, partner, correct_ans, ):
@@ -209,7 +207,7 @@ class Quiz:
         self.next_button = Button(self.button_frame, text="Next",
                                   bg="#00AAFF", fg="white", font="Arial 14 bold", width=5,
                                   command=lambda: self.next_question(flag_list, correct_ans, q_asked,
-                                                                     num_correct))
+                                                                         num_correct))
         self.next_button.grid(row=0, column=3, padx=5, pady=5)
 
         self.results_button = Button(self.button_frame, text="To Results",
@@ -357,11 +355,11 @@ class Quiz:
             self.stats_label.configure(fg="#00bbd4")
             self.results_button.config(state=NORMAL)
 
-            finish_statement = "Congratulations!! \n" \
-                               "You have finished the quiz!\n" \
-                               "Click the 'RESULTS' Button to look at your results"
+        finish_statement = "Congratulations!! \n" \
+                           "You have finished the quiz!\n" \
+                           "Click the 'RESULTS' Button to look at your results"
 
-            self.error_label.configure(bg="#00bbd4", font="Arial 15 bold", text=finish_statement, padx=5)
+        self.error_label.configure(bg="#00bbd4", font="Arial 15 bold", text=finish_statement, padx=5)
 
     def to_quit(self):
         root.destroy()
@@ -523,7 +521,7 @@ class Game_Results:
 
         Export(self, game_stats)
 
-    def to_quiz_help3(self):
+   def to_quiz_help3(self):
         help_text3 = "Welcome to the International Flags Quiz Results Page! \n" \
                      "This page tell you your grand stats.\n \n" \
                      "You can export your results in a .txt file via the 'Export' button. " \
