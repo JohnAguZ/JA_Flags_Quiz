@@ -26,7 +26,7 @@ class Start:
         self.flags_quiz_label.grid(row=0)
 
         # Initial Instructions (Row 1)
-        self.quiz_instructions = Label(self.start_frame, font="Arial 10 italic",
+        self.quiz_instructions = Label(self.start_frame, font="Arial 11 italic",
                                        text="Welcome to the International Flags Quiz \n \n "
                                             "To start the quiz click the 'Play' button below. "
                                             "If you want a more detailed explanation of the quiz, "
@@ -56,15 +56,17 @@ class Start:
 
     def to_quiz(self):
         correct_num = self.num_correct.get()
-
+        self.play_button.config(state=DISABLED)
         Quiz(self, correct_num)
 
     def to_help1(self):
         help_text1 = "Welcome to the International Flags Quiz. \n" \
                      "This quiz is aimed at testing your knowledge of different countries and their flags.\n \n" \
-                     "When you click the 'Play' button, you wil " \
-                     "\n " \
-                     "\n \n " \
+                     "When you click the 'Play' button, you will be brought the Quiz. " \
+                     "There will be a filler image that gives some info on what to do.\n \n" \
+                     "If you are still unsure on what to do \n" \
+                     "click on the 'Help' Button that is on the bottom left of the GUI.\n \n" \
+                     "Have fun and test your knowledge!! \n " \
 
         Help1(self, help_text1)
 
@@ -113,6 +115,7 @@ class Help1:
 
 class Quiz:
     def __init__(self, partner, correct_ans, ):
+
         #
         all_flags = open("flag_codes.csv")
         csv_all_flags = csv.reader(all_flags)
@@ -221,7 +224,7 @@ class Quiz:
         self.results_button.config(state=DISABLED)
 
     def to_game_results(self, game_stats, game_history):
-
+        game_stats = self.game_stats_list
         Game_Results(self, game_stats, game_history)
 
     def check_response(self):
@@ -260,6 +263,7 @@ class Quiz:
                 q_asked += 1
                 self.asked_questions.set(q_asked)
 
+                # Disable the submit button and enable the next button
                 self.submit_button.config(state=DISABLED)
                 self.next_button.config(state=NORMAL)
             elif compare1 == compare2:
@@ -275,6 +279,7 @@ class Quiz:
                 num_correct += 1
                 self.q_correct.set(num_correct)
 
+                # Disable the submit button and enable the next button
                 self.submit_button.config(state=DISABLED)
                 self.next_button.config(state=NORMAL)
 
@@ -282,6 +287,8 @@ class Quiz:
             is_wrong = "yes"
             error_feedback = "Please enter a country name (No Numbers or Decimals)"
 
+        # These check the user's input with the try variable above and if the user's input is right
+        # the program will respond saying that it is correct and it does the same when the response is wrong.
         if is_wrong == "yes":
             self.response_entry.config(bg=error_back)
             self.error_label.config(text=error_feedback, fg="#ff1100")
@@ -302,23 +309,22 @@ class Quiz:
         stat1 = q_asked  # Number of questions asked
         stat2 = num_correct  # Number of questions the user got correct
 
+        # Sets the number of questions asked as the first column in the game_stats_list
+        # and the Number of questions correct as the second column.
         self.game_stats_list[0] = stat1
         self.game_stats_list[1] = stat2
 
         # Stats statement
         stats_statement = "Questions Asked: {} \n" \
                           "Questions Correct: {}".format(stat1, stat2)
-        self.game_stats_list.append(stats_statement)
-        print(self.game_stats_list)
-
         # Edit the stats label
         self.stats_label.configure(text=stats_statement)
 
         # Round summary
         round_summary = "Name of country (Correct Answer): {}, " \
-                        "User's Response: {}, \n" \
+                        "User's Response: {}, \n \n" \
                         "Asked Questions: {}, " \
-                        "Questions Correct: {} \n ".format(correct_ans, response, q_asked, num_correct)
+                        "Questions Correct: {} \n \n ".format(correct_ans, response, q_asked, num_correct)
         self.game_history.append(round_summary)
 
         # Enable the response entry
@@ -361,14 +367,17 @@ class Quiz:
 
         # Ensures 10 questions have been asked.
         if num_asked == 10:
+            # Destroys the flag box so that there is no flag showing on screen (
             self.response_entry.destroy()
             self.flag_box.destroy()
             self.flags_label.destroy()
+
             self.submit_button.config(state=DISABLED)
             self.next_button.config(state=DISABLED)
             self.stats_label.configure(fg="#00bbd4")
             self.results_button.config(state=NORMAL)
 
+            # Replaces the flag image with the finish statement below
             finish_statement = "Congratulations!! \n" \
                                "You have finished the quiz!\n" \
                                "Click the 'RESULTS' Button to look at your results"
@@ -431,9 +440,10 @@ class Help_2:
 
 class Game_Results:
     def __init__(self, partner, game_stats, game_history):
-
+        print("Game Stats", game_stats)
         print("Game History", game_history)
 
+        self.game_stats_list = game_stats
         # Disable Help Button
         partner.results_button.config(state=DISABLED)
 
@@ -462,8 +472,8 @@ class Game_Results:
                                               "Please use the Export button to "
                                               "access the results of each "
                                               "round that you played ", wrap=250,
-                                         font="arial 10 italic",
-                                         justify=LEFT, fg="green",
+                                         font="Arial 10 italic",
+                                         justify=LEFT, fg="white",
                                          padx=10, pady=10, bg=background)
         self.export_instructions.grid(row=1)
 
@@ -485,6 +495,10 @@ class Game_Results:
         print(raw)
         percent = raw * 100
         print(percent)
+        quiz_data = "Questions Correct: {}, \n" \
+                    "Questions Asked: {}, \n" "Percent \n ".format(var_num_asked, num_correct, percent)
+        game_stats.append(quiz_data)
+        print(game_stats)
 
         self.correct_num_label = Label(self.details_frame, font=content, bg=background,
                                        text="Total Correct: {}/10".format(calc2))
