@@ -1,6 +1,12 @@
 from tkinter import *
 from functools import partial
+import random
 
+import glob
+
+txtfiles = []
+for file in glob.glob("*.txt"):
+    txtfiles.append(file)
 
 class Start:
     def __init__(self, parent):
@@ -24,6 +30,7 @@ class Start:
                                        wrap=275, justify=CENTER, padx=10, pady=10, bg="#E6E6E6")
         self.quiz_instructions.grid(row=1)
 
+
         # Play Button Frame (Note: Not Youtube) (Row 2)
         self.quiz_frame = Frame(self.start_frame, bg="#E6E6E6")
         self.quiz_frame.grid(row=2)
@@ -33,7 +40,7 @@ class Start:
 
         # Green High Stakes Button
         self.play_button = Button(self.quiz_frame, text="Play",
-                                  font=button_font, bg="#00994D", fg="white", width=10,
+                                  font=button_font, bg="#00994D",fg="white", width=10,
                                   command=lambda: self.to_quiz())
         self.play_button.grid(row=0, column=1, padx=10, pady=10)
 
@@ -45,71 +52,72 @@ class Start:
     def to_quiz(self):
         Quiz()
 
-
 class Quiz:
-
     def __init__(self):
         background_color = "#E3E3E3"
         box_back = "#9cff45"
         box_text = "Arial"
         box_width = 5
 
+        # List holding the
+        photos = PhotoImage("AB-flag.gif")
+
         # GUI Setup
         self.quiz_box = Toplevel()
         self.quiz_box.protocol('WM_DELETE_WINDOW', self.to_quit)
 
-        self.quiz_frame = Frame(self.quiz_box, bg=background_color, padx=10, pady=10)
+        self.quiz_frame = Frame(self.quiz_box, bg=background_color)
         self.quiz_frame.grid()
 
         # Heading Row
         self.heading_label = Label(self.quiz_frame, text="Heading",
-                                   font="Arial 24 bold", padx=10,
-                                   pady=10, bg=background_color)
+                                       font="Arial 24 bold", padx=10,
+                                       pady=10, bg=background_color)
         self.heading_label.grid(row=0)
 
         # Flag Row
         self.flag_box = Frame(self.quiz_frame, bg=background_color)
         self.flag_box.grid(row=2)
 
-        self.flags_label = Label(self.flag_box, font=box_text,
+        self.flags_label = Label(self.flag_box, text="Flags will show up here", font=box_text,
                                  bg=box_back, width=box_width, padx=10, pady=10)
+        print(photos)
         self.flags_label.grid(row=0, column=2)
+
 
         # Entry Box, Button and Error Label (Row 2)
         self.entry_error_frame = Frame(self.quiz_frame, width=200, bg=background_color)
         self.entry_error_frame.grid(row=3)
 
         self.response_entry = Entry(self.entry_error_frame,
-                                    font="Arial 16 bold", width=20)
+                                        font="Arial 16 bold", width=20)
         self.response_entry.grid(row=0, column=5, padx=5)
 
         self.error_label = Label(self.entry_error_frame,
-                                 bg=background_color, fg="maroon", text="",
-                                 font="Arial 10 bold", wrap=175,
-                                 justify=CENTER)
+                                     bg=background_color, fg="maroon", text="",
+                                     font="Arial 10 bold", wrap=175,
+                                     justify=CENTER)
         self.error_label.grid(row=0, columnspan=5, pady=5)
 
         # Buttons go here...
-        self.buttons_frame = Frame(self.quiz_frame, width=200, bg=background_color)
-        self.buttons_frame.grid(row=4)
 
         # Help Button
-        self.how_to_play_button = Button(self.buttons_frame, text="How To Play",
-                                         bg="#808080", fg="white", font="Arial 14 bold",
-                                         command=lambda: self.to_quiz_help2)
-        self.how_to_play_button.grid(row=0, column=1, padx=5, pady=5)
+        self.how_to_play_button = Button(self.quiz_frame, text="How To Play",
+                                             bg="#808080", fg="white", font="Arial 14 bold",
+                                             command=lambda: self.to_quiz_help2)
+        self.how_to_play_button.grid(row=4, column=1, padx=10, pady=10)
 
-        self.submit_button = Button(self.buttons_frame,
-                                    font="Arial 14 bold", bg="#009900",
-                                    text="Submit",
-                                    command=self.check_response)
-        self.submit_button.grid(row=0, column=2, padx=5, pady=5)
+        self.submit_button = Button(self.quiz_frame,
+                                        font="Arial 14 bold", bg="#009900",
+                                        text="Submit",
+                                        command=self.check_response)
+        self.submit_button.grid(row=4, column=2, padx=5)
 
-        self.next_button = Button(self.buttons_frame,
-                                  font="Arial 14 bold",
-                                  text="Next", bg="#00AAFF",
-                                  command=self.check_response)
-        self.next_button.grid(row=0, column=3, padx=5, pady=5)
+        self.next_button = Button(self.quiz_frame,
+                                      font="Arial 14 bold",
+                                      text="Next", bg="#00AAFF",
+                                      command=self.check_response)
+        self.next_button.grid(row=4, column=3, padx=5)
 
     def check_response(self, response):
         starting_balance = self.response_entry.get()
@@ -123,7 +131,7 @@ class Quiz:
         self.response_entry.config(bg="white")
         self.error_label.config(text="")
 
-    # Check the user's input
+        # Check the user's input
 
     def to_quit(self):
         root.destroy()
@@ -148,7 +156,6 @@ class Quiz:
                      ""
         Help2(self, help_text2)
 
-
 class Help2:
     def __init__(self, partner, help_text):
         background = "#a9ef99"
@@ -159,36 +166,37 @@ class Help2:
         # Sets up child window (ie: Help Box)
         self.help_box = Toplevel()
 
-        # If users press cross at the top, close help and 'release' help button
+                # If users press cross at the top, close help and 'release' help button
         self.help_box.protocol('WM_DELETE_WINDOW', partial(self.close_help, partner))
 
-        # Set up GUI Frame
+                # Set up GUI Frame
         self.help_frame = Frame(self.help_box, width=300, bg=background)
         self.help_frame.grid()
 
-        # Set up history heading (row 0)
+                # Set up history heading (row 0)
         self.how_heading = Label(self.help_frame, text="The Help Page",
-                                 font="Arial 19 bold", bg=background)
+                                         font="Arial 19 bold", bg=background)
         self.how_heading.grid(row=0)
 
-        # Help for Start Class (Label,Row 1)
+                # Help for Start Class (Label,Row 1)
         self.help_text = Label(self.help_frame,
-                               text=help_text, wrap=250,
-                               font="arial 10 italic",
-                               justify=LEFT, width=40, bg=background, fg="maroon",
-                               padx=10, pady=10)
+                                       text=help_text, wrap=250,
+                                       font="arial 10 italic",
+                                       justify=LEFT, width=40, bg=background, fg="maroon",
+                                       padx=10, pady=10)
         self.help_text.grid(row=1)
 
-        # Dismiss button (Row 2)
+                # Dismiss button (Row 2)
         self.dismiss_btn = Button(self.help_frame, text="Dismiss",
-                                  width=10, bg="orange", font="Arial 10 bold",
-                                  command=partial(self.close_help, partner))
+                                          width=10, bg="orange", font="Arial 10 bold",
+                                          command=partial(self.close_help, partner))
         self.dismiss_btn.grid(row=2, pady=10)
 
     def close_help(self, partner):
                 # Put history button back to normal...
         partner.help_button.config(state=NORMAL)
         self.help_box.destroy()
+
 
 
 # main routine

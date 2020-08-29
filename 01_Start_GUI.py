@@ -10,10 +10,6 @@ class Start:
         self.start_frame = Frame(padx=10, pady=10, bg="#E6E6E6")
         self.start_frame.grid()
 
-        # Set flag image to blank...
-        self.secret_flag = IntVar()
-        self.secret_flag.set(0)
-
         # Flags Heading (Row 0)
         self.flags_quiz_label = Label(self.start_frame, text="Country Flags Quiz",
                                        font="Arial 19 bold", bg="#E6E6E6")
@@ -28,6 +24,7 @@ class Start:
                                             "Have fun and good luck! ",
                                        wrap=275, justify=CENTER, padx=10, pady=10, bg="#E6E6E6")
         self.quiz_instructions.grid(row=1)
+
 
         # Play Button Frame (Note: Not Youtube) (Row 2)
         self.quiz_frame = Frame(self.start_frame, bg="#E6E6E6")

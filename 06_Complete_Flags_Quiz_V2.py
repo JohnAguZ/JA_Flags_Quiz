@@ -180,8 +180,8 @@ class Quiz:
 
         self.error_label = Label(self.entry_error_frame,
                                  bg=background_color, fg="maroon", text="What country has this flag?",
-                                 font="Arial 10 bold", wrap=175)
-        self.error_label.grid(row=3, columnspan=5, pady=5)
+                                 font="Arial 10 bold", wrap=200)
+        self.error_label.grid(row=3, columnspan=15, pady=5)
 
         # Stats label
         self.stats_frame = Frame(self.quiz_frame, bg=background_color)
@@ -218,14 +218,14 @@ class Quiz:
 
         self.results_button = Button(self.button_frame, text="To Results",
                                      bg="#003366", fg="white", font="Arial 14 bold",
-                                     command=lambda: self.to_game_results(self.game_stats_list, self.game_history))
+                                     command=lambda: self.to_quiz_results(self.game_stats_list, self.game_history))
         self.results_button.grid(row=0, column=4, padx=5, pady=5)
         self.submit_button.config(state=DISABLED)
         self.results_button.config(state=DISABLED)
 
-    def to_game_results(self, game_stats, game_history):
+    def to_quiz_results(self, game_stats, game_history):
         game_stats = self.game_stats_list
-        Game_Results(self, game_stats, game_history)
+        Quiz_Results(self, game_stats, game_history)
 
     def check_response(self):
         self.next_button.config(state=DISABLED)
@@ -367,22 +367,24 @@ class Quiz:
 
         # Ensures 10 questions have been asked.
         if num_asked == 10:
-            # Destroys the flag box so that there is no flag showing on screen (
+            # Destroys everything besides the heading and the error label
+            # and that only the Results button and the Finish statement are shown.
+            self.quiz_frame.configure(width=15, height=15)
             self.response_entry.destroy()
             self.flag_box.destroy()
             self.flags_label.destroy()
-
-            self.submit_button.config(state=DISABLED)
-            self.next_button.config(state=DISABLED)
-            self.stats_label.configure(fg="#00bbd4")
+            self.submit_button.destroy()
+            self.next_button.destroy()
+            self.stats_label.destroy()
             self.results_button.config(state=NORMAL)
 
             # Replaces the flag image with the finish statement below
-            finish_statement = "Congratulations!! \n" \
-                               "You have finished the quiz!\n" \
-                               "Click the 'RESULTS' Button to look at your results"
+            finish_statement = "Congratulations!! \n " \
+                               "You have finished the quiz! \n" \
+                               "Click the 'RESULTS' Button to look at your results  "
 
-            self.error_label.configure(bg="#00bbd4", font="Arial 15 bold", text=finish_statement, padx=5)
+            self.error_label.configure(bg="#00bbd4", font="Arial 15 italic", text=finish_statement, padx=10,
+                                       width=30)
 
     def to_quit(self):
         root.destroy()
@@ -438,7 +440,8 @@ class Help_2:
         self.help_box.destroy()
 
 
-class Game_Results:
+# The Quiz Results
+class Quiz_Results:
     def __init__(self, partner, game_stats, game_history):
         print("Game Stats", game_stats)
         print("Game History", game_history)
@@ -462,7 +465,7 @@ class Game_Results:
         self.stats_frame.grid()
 
         # Set up Help heading (Row 0)
-        self.stats_heading_label = Label(self.stats_frame, text="Game Statistics",
+        self.stats_heading_label = Label(self.stats_frame, text="Quiz Stats",
                                          font="arial 19 bold", bg=background)
         self.stats_heading_label.grid(row=0)
 
@@ -473,7 +476,7 @@ class Game_Results:
                                               "access the results of each "
                                               "round that you played ", wrap=250,
                                          font="Arial 10 italic",
-                                         justify=LEFT, fg="white",
+                                         justify=LEFT, fg="green",
                                          padx=10, pady=10, bg=background)
         self.export_instructions.grid(row=1)
 
@@ -481,22 +484,22 @@ class Game_Results:
         self.details_frame = Frame(self.stats_frame, bg=background)
         self.details_frame.grid(row=2)
 
-        # Calculate percentage
+        # Separates the data into their individual integers for calculation of the percentage
         var_num_asked = game_stats[0]
         num_correct = game_stats[1]
 
-        calc1 = var_num_asked
-        calc2 = num_correct
+        # Sets the variables as Calc1 and Calc2
+        calc1 = var_num_asked  # var_num_asked = the number of questions asked
+        calc2 = num_correct    # num_correct  = The number of questions the user got correct
 
         print("calc1", calc1)
         print("calc2", calc2)
 
         raw = calc2 / float(10)
         print(raw)
-        percent = raw * 100
-        print(percent)
+        percent = (raw * 100)
         quiz_data = "Questions Correct: {}, \n" \
-                    "Questions Asked: {}, \n" "Percent \n ".format(var_num_asked, num_correct, percent)
+                    "Questions Asked: {}, \n" "Percent: {}% \n ".format(var_num_asked, num_correct, percent)
         game_stats.append(quiz_data)
         print(game_stats)
 
